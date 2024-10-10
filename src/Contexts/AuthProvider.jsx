@@ -76,7 +76,7 @@ const AuthProvider = ({ children }) => {
 
     const reg = async (email, password, walletAddress) => {
         try {
-            const response = await axios.post('https://avet-shop-748665ae765c.herokuapp.com/users/register', {
+            const response = await axios.post('https://avet-shop-748665ae765c.herokuapp.com/api/users/register', {
                 UserName: email.split('@')[0],  // Приклад створення username
                 Email: email,
                 Password: password,
