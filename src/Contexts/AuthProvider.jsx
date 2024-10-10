@@ -41,14 +41,14 @@ const AuthProvider = ({ children }) => {
         const decodedToken = jwtDecode(token);
         const currentId = decodedToken.userId;
         if (role == "User"){
-            const response = await axios.post('http://localhost:5257/api/sellers/login',{
+            const response = await axios.post('https://avet-shop-748665ae765c.herokuapp.com/api/sellers/login',{
                 UserID: currentId
             })
         }
     }
     const login = async (email, password) => {
         try {
-            const response = await axios.post('http://localhost:5257/api/users/login', {
+            const response = await axios.post('https://avet-shop-748665ae765c.herokuapp.com/api/users/login', {
                 Email: email,
                 Password: password,
             });
@@ -76,7 +76,7 @@ const AuthProvider = ({ children }) => {
 
     const reg = async (email, password, walletAddress) => {
         try {
-            const response = await axios.post('http://localhost:5257/api/users/register', {
+            const response = await axios.post('https://avet-shop-748665ae765c.herokuapp.com/users/register', {
                 UserName: email.split('@')[0],  // Приклад створення username
                 Email: email,
                 Password: password,
