@@ -1,7 +1,7 @@
 import List from 'react-bootstrap/ListGroup'; 
 import ListGroupItem from 'react-bootstrap/ListGroupItem';
 import { useEffect, useState } from 'react';
-import { fetchCategories } from './fetchCategories';
+import { fetchCategories } from './Categories';
 
 export default function ListGroup() {
     const [categories, setCategories] = useState([]);
