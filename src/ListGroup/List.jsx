@@ -1,24 +1,30 @@
-import List from 'react-bootstrap/ListGroup'; 
+import { useEffect, useState, useContext } from 'react';
 import ListGroupItem from 'react-bootstrap/ListGroupItem';
-import { useEffect, useState } from 'react';
-import { fetchCategories } from './Categories';
+import List from 'react-bootstrap/ListGroup';
+import { AuthContext } from '../Contexts/AuthProvider'; // Імпорт контексту AuthProvider
 
 export default function ListGroup() {
     const [categories, setCategories] = useState([]);
+    const { apiRequest } = useContext(AuthContext); // Отримання apiRequest з AuthContext
 
     useEffect(() => {
         const fetchData = async () => {
-            let categories = await fetchCategories();
-            setCategories(categories);
-        }
+            try {
+                const categories = await apiRequest('GET', 'api/categories');
+                setCategories(categories);
+            } catch (error) {
+                console.error("Error fetching categories:", error);
+            }
+        };
+
         fetchData();
-    }, []);
+    }, [apiRequest]); // Додаємо apiRequest до залежностей useEffect
 
     return (
         <List>
             {categories.map(n => (
-                <ListGroupItem key={n.CategoryID}>
-                    <p>{n.CategoryName}</p>
+                <ListGroupItem key={n.categoryID}>
+                    <p>{n.categoryName}</p>
                 </ListGroupItem>
             ))}
         </List>

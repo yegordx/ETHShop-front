@@ -10,7 +10,7 @@ export default function Registration() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const { reg, errorMessage } = useContext(AuthContext);
+  const { setTokenAndRole, apiRequest, errorMessage, setErrorMessage } = useContext(AuthContext);
 
   const navigate = useNavigate();
   
@@ -20,29 +20,41 @@ export default function Registration() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Перевірка на порожні поля
     if (!email || !password || !confirmPassword) {
       setErrorMessage('Please fill in all fields.');
       return;
     }
 
-    // Перевірка на збіг паролів
     if (password !== confirmPassword) {
       setErrorMessage('Passwords do not match.');
       return;
     }
 
-    // Перевірка чи є підключена адреса гаманця
     if (!address) {
       setErrorMessage('Please connect your wallet.');
       return;
     }
 
-    const success = await reg(email, password, address);
+    try {
+      const response = await apiRequest('POST', 'api/users', {
+        UserName: email.split('@')[0], 
+        Email: email,
+        Password: password,
+        WalletAddress: address,
+      });
 
-    if (success) {
-      navigate("/");
-    }
+      if (response) {
+          const token = response.token; // Припускаємо, що ваш API повертає токен
+          setTokenAndRole(token); // Встановлюємо токен і роль
+          navigate("/");  // Redirect on successful login
+      } else {
+          setErrorMessage('Authentication failed.');
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      setErrorMessage('An error occurred during login.');
+      }
   };
 
   return (
