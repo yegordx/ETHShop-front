@@ -8,7 +8,11 @@ export default function Header() {
     const { isAuthenticated, logout, switchAccount, role, userId } = useContext(AuthContext);
     const navigate = useNavigate(); // Використовуємо useNavigate для маршрутизації
     const handleViewDetails = () => {
-        navigate(`/SellerProfile/${userId}`); // Перенаправлення на сторінку деталей товару
+        if(role=="User"){
+            navigate(`/UserProfile/${userId}`);
+        }else if(role == "Seller"){
+            navigate(`/SellerProfile/${userId}`);
+        }
     };
     
     return (
@@ -31,24 +35,16 @@ export default function Header() {
                     {role === "User" ? (
                         <>
                             <NavElement to="/cart" text="Cart" />
-                            <NavElement to="/wishlist" text="Wishlists" />
+                            <NavElement to="/WishLists" text="Wishlists" />
                         </>
                     ) : null}
 
                     {isAuthenticated ? (
                         <NavElement text="Profile">
-                            {role === "User" ? (
-                                <>
-                                    <DropDownItem text="Profile" to="/UserProfile" />
-                                </>
-                            ) : (
-                                <>
-                                    <DropDownItem
-                                        text="Profile"
-                                        onClick = {handleViewDetails} // Використовуємо userId для формування URL
-                                    />
-                                </>
-                            )}
+                            <DropDownItem
+                                text="Profile"
+                                onClick = {handleViewDetails} // Використовуємо userId для формування URL
+                            />
                             <DropDownItem text="Switch account" onClick={switchAccount} />
                             <DropDownItem text="Logout" onClick={logout} />
                         </NavElement>
