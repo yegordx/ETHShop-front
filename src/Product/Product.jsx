@@ -18,6 +18,18 @@ export default function Product() {
         setShowWishlistModal(true);
     };
     
+    async function handleAddToShoppingCart (productId) {
+        try{
+            console.log(userId);
+            console.log(productId);
+            const response = await apiRequest('POST', `api/shoppingcarts/${userId}/${productId}`);
+
+        }catch(error){
+
+        }
+        
+    };
+
     const handleSelectWishlist = async (wishListID) => {
         try {
             // Логіка для додавання товару до вибраного списку бажань
@@ -72,10 +84,15 @@ export default function Product() {
                                 <strong>Price: </strong>
                                 {product.priceETH} ETH
                             </Card.Text>
-                            <Button variant="primary">Add to Cart</Button>{' '}
-                            <Button variant="secondary" onClick={() => handleAddToWishlist(productId)}>
-                                Add to Wishlist
-                            </Button>
+                            { isAuthenticated ? (
+                                <>
+                                <Button variant="primary" onClick={() => handleAddToShoppingCart(productId)}>Add to Cart</Button>{' '}
+                                <Button variant="secondary" onClick={() => handleAddToWishlist(productId)}>
+                                    Add to Wishlist
+                                </Button>
+                                </>
+                            ) : null }
+                            
                         </Card.Body>
                     </Card>
                 </Col>

@@ -3,15 +3,15 @@ import { AuthContext } from '../Contexts/AuthProvider';
 import { Card, Button, ListGroup, Alert, Container, Row, Col, Form, Modal } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 
-
 export default function WishLists() {
     const { apiRequest, userId } = useContext(AuthContext);
     const [wishlists, setWishlists] = useState([]);
     const [errorMessage, setErrorMessage] = useState('');
     const [newWishlistName, setNewWishlistName] = useState('');
     const [showModal, setShowModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false); // Модальне вікно для редагування списку // Назва нового списку
+    const [showEditModal, setShowEditModal] = useState(false); // Модальне вікно для редагування списку
     const [editingWishlistId, setEditingWishlistId] = useState(null);
+    const [wishListItems, setWishListItems] = useState({}); // Стан для кожного списку побажань
 
     const navigate = useNavigate();
     
@@ -20,8 +20,14 @@ export default function WishLists() {
             try {
                 const response = await apiRequest('GET', `api/wishlists/${userId}`);
                 setWishlists(response);
+                // Ініціалізуємо стан для кожного списку побажань
+                const initialWishListItems = response.reduce((acc, wishlist) => {
+                    acc[wishlist.wishListID] = wishlist.wishListItems;
+                    return acc;
+                }, {});
+                setWishListItems(initialWishListItems);
             } catch (error) {
-
+                console.error('Error fetching wishlists:', error);
             }
         };
 
@@ -37,9 +43,9 @@ export default function WishLists() {
                 UserId: userId,
                 WishListName: newWishlistName, // Виправлено на правильну назву
             });
-
+            setWishlists([...wishlists, response]); // Додаємо новий список до стану
         } catch (error) {
-
+            console.error('Error creating wishlist:', error);
         }
     };
 
@@ -47,19 +53,35 @@ export default function WishLists() {
         try {
             await apiRequest('DELETE', `api/wishlists/${wishListID}`);
             setWishlists(wishlists.filter(wishlist => wishlist.wishListID !== wishListID));
+            setWishListItems((prevItems) => {
+                const updatedItems = { ...prevItems };
+                delete updatedItems[wishListID];
+                return updatedItems;
+            });
         } catch (error) {
             console.error('Error deleting wishlist:', error);
         }
     };
 
-    // Функція для відкриття модального вікна для редагування
     const handleEditWishList = (wishListID, currentName) => {
         setEditingWishlistId(wishListID);
         setNewWishlistName(currentName);
         setShowEditModal(true);
     };
 
-    // Функція для збереження редагованої назви списку побажань
+    const handleRemoveWishListItem = async (wishListID, wishListItemID) => {
+        try {
+            await apiRequest('DELETE', `api/wishlists/remove/${wishListItemID}`);
+            // Оновлюємо стан конкретного списку бажань
+            setWishListItems((prevItems) => ({
+                ...prevItems,
+                [wishListID]: prevItems[wishListID].filter(item => item.wishListItemID !== wishListItemID)
+            }));
+        } catch (error) {
+            console.error('Error removing wishlist item:', error);
+        }
+    };
+
     const handleSaveEditedWishlist = async (event) => {
         event.preventDefault();
         try {
@@ -67,7 +89,6 @@ export default function WishLists() {
                 'Content-Type': 'application/json'
             });
     
-            // Оновлюємо стан списків бажань із новою назвою
             setWishlists(
                 wishlists.map((wishlist) =>
                     wishlist.wishListID === editingWishlistId
@@ -75,7 +96,7 @@ export default function WishLists() {
                         : wishlist
                 )
             );
-            setShowEditModal(false); // Закриваємо модальне вікно після успішного збереження
+            setShowEditModal(false);
         } catch (error) {
             console.error('Error updating wishlist:', error);
         }
@@ -94,19 +115,26 @@ export default function WishLists() {
                                     <h5>{wishlist.name}</h5>
                                 </Card.Header>
                                 <Card.Body>
-                                    {wishlist.wishListItems.length > 0 ? (
+                                    {wishListItems[wishlist.wishListID]?.length > 0 ? (
                                         <ListGroup variant="flush">
-                                            {wishlist.wishListItems.map((item) => (
+                                            {wishListItems[wishlist.wishListID].map((item) => (
                                                 <ListGroup.Item key={item.wishListItemID}>
                                                     <strong>{item.productName}</strong>
                                                     <br />
-                                                    Added : {new Date(item.dateAdded).toLocaleDateString()}
+                                                    Added: {new Date(item.dateAdded).toLocaleDateString()}
                                                     <br />
                                                     <Button
                                                         variant="primary"
                                                         onClick={() => navigate(`/product/${item.productID}`)}
                                                     >
                                                         View Product
+                                                    </Button>
+                                                    <Button
+                                                        variant="danger"
+                                                        onClick={() => handleRemoveWishListItem(wishlist.wishListID, item.wishListItemID)}
+                                                        className="ml-2"
+                                                    >
+                                                        ✖
                                                     </Button>
                                                 </ListGroup.Item>
                                             ))}
@@ -139,12 +167,11 @@ export default function WishLists() {
                 )}
             </Row>
 
-            {/* Кнопка для відкриття модального вікна для створення нового списку бажань */}
+            {/* Модальне вікно для створення нового списку бажань */}
             <Button variant="success" onClick={() => setShowModal(true)}>
                 Create New Wishlist
             </Button>
 
-            {/* Модальне вікно для введення назви нового списку бажань */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Create New Wishlist</Modal.Title>
@@ -167,7 +194,7 @@ export default function WishLists() {
                 </Modal.Body>
             </Modal>
 
-            {/* Модальне вікно для редагування назви списку побажань */}
+            {/* Модальне вікно для редагування списку побажань */}
             <Modal show={showEditModal} onHide={() => setShowEditModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>Edit Wishlist</Modal.Title>
@@ -192,7 +219,6 @@ export default function WishLists() {
         </Container>
         </>
     );
-    
 }
 
 

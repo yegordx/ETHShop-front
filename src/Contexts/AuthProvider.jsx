@@ -53,7 +53,7 @@ const AuthProvider = ({ children }) => {
         
     };
 
-    const apiRequest = async (method, route, data = null, headers = {}) => {
+    const apiRequest = async (method, route, data, headers = {}) => {
         const baseURL = 'https://avet-shop-748665ae765c.herokuapp.com/';
       
         try {
@@ -97,24 +97,19 @@ const AuthProvider = ({ children }) => {
             console.log(userRole);
         
             try {
-                response = await apiRequest('POST', 'api/sellers/login', {
-                    UserID: decodedToken.userId 
-                });
+                response = await apiRequest('POST', `api/sellers/login/${decodedToken.userId}`);
                 if (response && response.token) {
                     const currentToken = response.token;
                     setTokenAndRole(currentToken);  // Оновлюємо токен і роль
                     navigate("/");  // Перенаправляємо на головну сторінку
                 } else {
+                    navigate("/register-seller");
                     console.error('No token in response');
                 }
             } catch (error) {
-                if (error.response && error.response.status === 400) {
                     navigate("/register-seller");  // Перенаправляємо на реєстрацію продавця, якщо статус 400
-                } else {
-                    console.error('Error during seller login:', error);
-                }
-                return; // Виходимо з функції, якщо сталася помилка
             }
+            
         } else {
             // Якщо роль не "User", виконуємо logout і перенаправляємо на логін
             logout();
