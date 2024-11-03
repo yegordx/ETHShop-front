@@ -1,58 +1,59 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../Contexts/AuthProvider'; // Ваш контекст
-import { Card, Container, Row, Col, Button, Modal, Form } from 'react-bootstrap';
+import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
+
+import CreateProductModal from '../Product/CreateProductModal';
 
 export default function SellerProfile() {
-    const { apiRequest, userId } = useContext(AuthContext); // currentUser для перевірки власника сторінки
+    const { apiRequest, userId } = useContext(AuthContext);
     const [sellerData, setSellerData] = useState(null);
-    const [products, setProducts] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [showModal, setShowModal] = useState(false); // Для керування модальним вікном
-    const [newProduct, setNewProduct] = useState({ name: '', description: '', priceETH: '', categoryId: '' }); // Поля для нового товару
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchSellerData = async () => {
-            try {
-                console.log(userId);
-                const response = await apiRequest('GET', `api/sellers/${userId}`);
-                setSellerData(response); // Зберігаємо інформацію про продавця
-                setProducts(response.products); // Зберігаємо товари продавця
-            } catch (error) {
-                console.error('Error:', error);
-                setErrorMessage('An error occurred while fetching seller data.');
-            }
-        };
-
-        fetchSellerData();
-    }, [apiRequest, userId]);
-
-    const handleAddProduct = async () => {
+    const { sellerId } = useParams();
+    const [showModal, setShowModal] = useState(false);
+    
+    async function fetchSellerData() {
         try {
-            const response = await apiRequest('GET', 'api/categories');
-            setCategories(response); // Зберігаємо категорії
-            setShowModal(true); // Відкриваємо модальне вікно
+            const response = await apiRequest('GET', `api/sellers/${sellerId}`);
+            setSellerData(response);
+            console.log(response);
         } catch (error) {
-            console.error('Error:', error);
-            setErrorMessage('An error occurred while fetching categories.');
+            console.error('Failed to fetch seller data:', error);
+        }
+    }
+
+    const handleDeleteProduct = async (productId) => {
+        console.log(productId);
+        try {
+            await apiRequest('DELETE', `api/products/${productId}`);
+            fetchSellerData();
+        } catch (error) {
+            console.error('Failed to delete product:', error);
         }
     };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewProduct(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
+    useEffect(() => {
+        if (sellerId) {
+            fetchSellerData();
+            console.log(userId);
+            console.log(sellerId);
+        }
+    }, [userId]);
 
-    const handleSubmitProduct = async () => {
-        // Виконати запит на створення товару
-        console.log("New product data:", newProduct);
-        // Додайте логіку для створення товару
-        setShowModal(false); // Закрити модальне вікно після підтвердження
+    // Відкрити і закрити модальне вікно
+    const handleShowModal = () => setShowModal(true);
+    const handleCloseModal = () => setShowModal(false);
+
+    // Відправка запиту для створення нового продукту
+    const handleCreateProduct = async (newProductData) => {
+        try {
+            await apiRequest('POST', 'api/products', {
+                sellerID: sellerId,
+                ...newProductData
+            });
+            fetchSellerData(); // Оновити список продуктів після створення
+        } catch (error) {
+            console.error('Failed to create product:', error);
+        }
     };
 
     if (!sellerData) {
@@ -60,113 +61,67 @@ export default function SellerProfile() {
     }
 
     return (
-        <Container className="mt-5">
-            {errorMessage && <p className="text-danger">{errorMessage}</p>}
+        <Container className="mt-5" style={{ minHeight: '100vh' }}>
             <Row>
-                {/* Особиста інформація продавця */}
                 <Col md={4}>
-                    <div className="border p-3">
-                        <h4>{sellerData.name}</h4>
-                        <p>Email: {sellerData.email}</p>
-                        <p>Телефон: {sellerData.phone}</p>
-                        <p>Адреса: {sellerData.address}</p>
-                    </div>
+                    <Card>
+                        <Card.Body>
+                            <Card.Title>Store Information</Card.Title>
+                            <ListGroup variant="flush">
+                                <ListGroup.Item><strong>Store Name:</strong> {sellerData.storeName}</ListGroup.Item>
+                                <ListGroup.Item><strong>Description:</strong> {sellerData.description}</ListGroup.Item>
+                                <ListGroup.Item><strong>Email:</strong> {sellerData.email}</ListGroup.Item>
+                                <ListGroup.Item><strong>Phone Number:</strong> {sellerData.phoneNumber}</ListGroup.Item>
+                            </ListGroup>
+                        </Card.Body>
+                    </Card>
                 </Col>
 
-                {/* Товари, які продає продавець */}
                 <Col md={8}>
-                    <h4>Товари продавця</h4>
-                    <Row>
-                        {products.map(product => (
-                            <Col md={6} className="mb-4" key={product.id}>
-                                <Card>
-                                    <Card.Img variant="top" src={product.imageUrl} />
-                                    <Card.Body>
-                                        <Card.Title>{product.name}</Card.Title>
-                                        <Card.Text>Ціна: {product.price} $</Card.Text>
-                                        <button className="btn btn-primary">Додати до кошика</button>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))}
-                    </Row>
-
-                    {/* Кнопка для додавання товару (тільки для власника сторінки) */}
-                    {currentUser?.userId === sellerData.sellerID ? (
-                        <Button variant="success" onClick={handleAddProduct}>Add Product</Button>
-                    ) : null}
+                    <Card className="mb-4">
+                        <Card.Body>
+                            <Card.Title>Products</Card.Title>
+                            {userId === sellerId && (
+                                <Button variant="primary" className="mb-3" onClick={handleShowModal}>
+                                    Add New Product
+                                </Button>
+                            )}
+                            {sellerData.products && sellerData.products.length > 0 ? (
+                            <ListGroup variant="flush">
+                                {sellerData.products.map(product => (
+                                    <ListGroup.Item key={product.id}>
+                                        <strong>Product Name:</strong> {product.productName} - 
+                                        <strong> Description:</strong> {product.description} - 
+                                        <strong> Price:</strong> {product.priceETH} ETH
+                                        {userId === sellerId && (
+                                            <Button 
+                                                variant="danger" 
+                                                onClick={() => handleDeleteProduct(product.id)} 
+                                                style={{ float: 'right' }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        )}
+                                    </ListGroup.Item>
+                                ))}
+                            </ListGroup>
+                        ) : (
+                            <p>No products found.</p>
+                        )}
+                        </Card.Body>
+                    </Card>
                 </Col>
             </Row>
 
-            {/* Модальне вікно для додавання нового товару */}
-            <Modal show={showModal} onHide={() => setShowModal(false)}>
-                <Modal.Header closeButton>
-                    <Modal.Title>Додати новий товар</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <Form>
-                        <Form.Group controlId="productName">
-                            <Form.Label>Назва товару</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="name"
-                                value={newProduct.name}
-                                onChange={handleInputChange}
-                                placeholder="Введіть назву товару"
-                            />
-                        </Form.Group>
-
-                        <Form.Group controlId="productDescription">
-                            <Form.Label>Опис</Form.Label>
-                            <Form.Control
-                                as="textarea"
-                                name="description"
-                                value={newProduct.description}
-                                onChange={handleInputChange}
-                                rows={3}
-                                placeholder="Опис товару"
-                            />
-                        </Form.Group>
-
-                        <Form.Group controlId="productPrice">
-                            <Form.Label>Ціна в ETH</Form.Label>
-                            <Form.Control
-                                type="text"
-                                name="priceETH"
-                                value={newProduct.priceETH}
-                                onChange={handleInputChange}
-                                placeholder="Введіть ціну в ETH"
-                            />
-                        </Form.Group>
-
-                        <Form.Group controlId="productCategory">
-                            <Form.Label>Категорія</Form.Label>
-                            <Form.Control
-                                as="select"
-                                name="categoryId"
-                                value={newProduct.categoryId}
-                                onChange={handleInputChange}
-                            >
-                                <option>Оберіть категорію</option>
-                                {categories.map(category => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </Form.Control>
-                        </Form.Group>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={() => setShowModal(false)}>
-                        Закрити
-                    </Button>
-                    <Button variant="primary" onClick={handleSubmitProduct}>
-                        Підтвердити
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+            {/* Виклик модального вікна */}
+            <CreateProductModal 
+                show={showModal} 
+                handleClose={handleCloseModal} 
+                handleCreateProduct={handleCreateProduct} 
+            />
         </Container>
     );
 }
+
+
 

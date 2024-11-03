@@ -34,6 +34,7 @@ function CartModal({ items, show, onClose }) {
     );
 
     const handleOrder = (sellerId) => {
+        onClose();
         navigate(`/MakeOrder/${sellerId}`);
     };
 

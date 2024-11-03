@@ -20,6 +20,7 @@ function AddressManager({ userId, onAddressSelect }) {
         try {
             const response = await apiRequest('GET', `api/addresses/${userId}/all`);
             setAddresses(response);
+            console.log(response);
         } catch (error) {
             console.error("Error fetching addresses:", error);
         }
@@ -34,13 +35,18 @@ function AddressManager({ userId, onAddressSelect }) {
     const handleAddNewAddress = async () => {
         try {
             const response = await apiRequest('POST', `api/addresses/${userId}`, {
-                ...newAddress
+                Name: newAddress.name,
+                Surname: newAddress.surname,
+                Country: newAddress.country,
+                City: newAddress.city,
+                AddressLine: newAddress.addressLine,
+                PostalCode: newAddress.postalCode || '' // Опціонально
             });
             setAddresses([...addresses, response]);
             setShowAddressModal(false);
             setSelectedAddress(response.id);
-            onAddressSelect(response.id); // Оновлення вибраної адреси
-            setNewAddress({ name: '', surname: '', country: '', city: '', addressLine: '', postalCode: '' }); // Скидання форми
+            onAddressSelect(response.id);
+            setNewAddress({ name: '', surname: '', country: '', city: '', addressLine: '', postalCode: '' });
         } catch (error) {
             console.error("Error adding new address:", error);
         }
@@ -53,22 +59,23 @@ function AddressManager({ userId, onAddressSelect }) {
 
     return (
         <>
-            <Form.Group controlId="deliveryAddress">
+           <Form.Group controlId="deliveryAddress">
                 <Form.Label>Delivery Address</Form.Label>
                 <Form.Select
                     value={selectedAddress}
                     onChange={(e) => {
                         const value = e.target.value;
                         if (value === "addNew") {
-                            setShowAddressModal(true);
+                            setShowAddressModal(true); // Відкриваємо модальне вікно для додавання нової адреси
                         } else {
-                            handleAddressSelect(value);
+                            handleAddressSelect(value); // Вибір існуючої адреси
+                            setSelectedAddress(value); // Оновлюємо selectedAddress
                         }
                     }}
                 >
                     <option value="">Select an address</option>
                     {addresses.map((address) => (
-                        <option key={address.id} value={address.id}>
+                        <option key={address.addressId} value={address.addressId}>
                             {address.addressLine}, {address.city}, {address.country}, {address.postalCode}
                         </option>
                     ))}

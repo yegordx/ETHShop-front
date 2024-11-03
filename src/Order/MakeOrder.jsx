@@ -22,15 +22,6 @@ function MakeOrder() {
         }
     }
 
-    async function fetchAddressData() {
-        try {
-            const response = await apiRequest('GET', `api/addresses/${userId}/all`);
-            setAddresses(response);
-        } catch (error) {
-            console.error("Error fetching addresses:", error);
-        }
-    }
-
     useEffect(() => {
         if (userId) {
             fetchItemsData();
@@ -45,10 +36,9 @@ function MakeOrder() {
 
         try {
             await apiRequest('POST', `api/orders`, {
-                userId,
-                sellerId,
-                addressId: selectedAddress,
-                items: items.map((item) => ({ id: item.id, quantity: item.quantity }))
+                UserId: userId,
+                SellerId: sellerId,
+                AddressId: selectedAddress
             });
             alert("Order placed successfully!");
             navigate('/orders');

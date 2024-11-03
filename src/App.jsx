@@ -15,6 +15,7 @@ import Category from './ListGroup/Category'
 import Product from './Product/Product'
 import WishLists from './UserAtributes/WishLists'
 import MakeOrder from './Order/MakeOrder'
+import ReviewsPage from './Review/ReviewsPage'
 
 function App() {
   return (
@@ -27,12 +28,13 @@ function App() {
             <Route path="/loginUser" element={<Login />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/SellerProfile/:sellerId" element={<SellerProfile />} />
-            <Route path="/UserProfile/:userId" element={<UserProfile />} />
+            <Route path="/UserProfile/:userID" element={<UserProfile />} />
             <Route path="/register-seller" element={<RegSeller/>} />
             <Route path="/Category/:categoryId" element={<Category />} />
             <Route path="/Product/:productId" element={<Product />} />
             <Route path="/WishLists" element={<WishLists />} />
             <Route path="/MakeOrder/:sellerId" element={<MakeOrder />} />
+            <Route path="/ReviewsPage" element={<ReviewsPage />} />
           </Routes>
           <FooterComponent />
         </AuthProvider>
