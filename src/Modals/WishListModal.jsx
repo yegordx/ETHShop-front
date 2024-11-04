@@ -13,9 +13,9 @@ const WishlistModal = ({ show, onHide, wishlists, handleSelectWishlist }) => {
                     <ListGroup>
                         {wishlists.map((wishlist) => (
                             <ListGroup.Item
-                                key={wishlist.wishListID}
+                                key={wishlist.wishListId}
                                 action
-                                onClick={() => handleSelectWishlist(wishlist.wishListID)}
+                                onClick={() => handleSelectWishlist(wishlist.wishListId)}
                             >
                                 {wishlist.name}
                             </ListGroup.Item>

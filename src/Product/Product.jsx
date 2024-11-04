@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Contexts/AuthProvider';
 import { Container, Row, Col, Card, Button, Alert, Modal } from 'react-bootstrap';
 import WishlistModal from '../Modals/WishListModal';
+import ReviewCard from '../Review/ReviewCard';
 
 export default function Product() {
     const { apiRequest, userId, isAuthenticated } = useContext(AuthContext);
@@ -13,11 +14,24 @@ export default function Product() {
     const [errorMessage, setErrorMessage] = useState('');
     const { productId } = useParams(); // Отримання ID товару з URL
 
+    const [reviews, setReviews] = useState([]);
+
     const handleAddToWishlist = (productId) => {
         setSelectedProductId(productId);
         setShowWishlistModal(true);
     };
     
+    async function fetchReviewsData() {
+        try {
+            const response = await apiRequest('GET', `api/reviews`, {
+                prodcutId: productId
+            });
+            setReviews(response);
+        } catch (error) {
+            console.error('Failed to fetch seller data:', error);
+        }
+    }
+
     async function handleAddToShoppingCart (productId) {
         try{
             console.log(userId);
@@ -32,7 +46,6 @@ export default function Product() {
 
     const handleSelectWishlist = async (wishListID) => {
         try {
-            // Логіка для додавання товару до вибраного списку бажань
             await apiRequest('POST', `api/wishlists/${wishListID}/${ selectedProductId }`);
             setShowWishlistModal(false); // Закриваємо модальне вікно після додавання
         } catch (error) {
@@ -67,6 +80,7 @@ export default function Product() {
         
         fetchProductData();
         fetchWishListsData();
+        fetchReviewsData();
     }, [apiRequest, productId, userId, isAuthenticated]);
 
     return (
@@ -96,6 +110,7 @@ export default function Product() {
                         </Card.Body>
                     </Card>
                 </Col>
+                <ReviewCard reviews={reviews} />
             </Row>
         ) : (
             <Row className="justify-content-center mt-4">

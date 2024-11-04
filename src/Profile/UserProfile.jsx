@@ -3,10 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../Contexts/AuthProvider';
 import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
 import OrderCard from '../Order/OrderCard';
-
+import EditUser from './EditUser';
 export default function UserProfile() {
-    const { apiRequest, userId} = useContext(AuthContext);
+    const { apiRequest, userId, logout } = useContext(AuthContext);
     const [userData, setUserData] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
     const navigate = useNavigate();
     const { userID } = useParams();
 
@@ -31,13 +32,27 @@ export default function UserProfile() {
     }
 
     const handleViewAllReviews = () => {
-        navigate('/ReviewsPage'); // шлях до сторінки з усіма відгуками користувача
+        navigate('/ReviewsPage'); // path to the page with all user reviews
+    };
+
+    const handleEditUser = () => {
+        setIsEditing(true);
+    };
+
+    const handleDeleteUser = async () => {
+        // Implement delete user functionality here
+        try {
+            await apiRequest('DELETE', `api/users/${userID}`);
+            logout();
+            navigate('/'); // Redirect to the homepage or appropriate route after deletion
+        } catch (error) {
+            console.error('Failed to delete user:', error);
+        }
     };
 
     return (
         <Container className="mt-5" style={{ minHeight: '100vh' }}>
             <Row>
-                {/* Основна інформація про користувача */}
                 <Col md={4}>
                     <Card>
                         <Card.Body>
@@ -46,28 +61,32 @@ export default function UserProfile() {
                                 <ListGroup.Item><strong>Username:</strong> {userData.userName}</ListGroup.Item>
                                 <ListGroup.Item><strong>Email:</strong> {userData.email}</ListGroup.Item>
                             </ListGroup>
+                            {userId === userID && (
+                                <div className="mt-3">
+                                    <Button variant="warning" onClick={handleEditUser}>Edit User</Button>
+                                    <Button variant="danger" onClick={handleDeleteUser} className="ms-2">Delete User</Button>
+                                </div>
+                            )}
                         </Card.Body>
                     </Card>
                 </Col>
 
-                {/* Замовлення */}
                 <Col md={8}>
-                <Card className="mb-4">
-                    <Card.Body>
-                        <Card.Title>Orders</Card.Title>
-                        {userData.orders && userData.orders.length > 0 ? (
-                            <ListGroup variant="flush">
-                                {userData.orders.map(order => (
-                                    <OrderCard key={order.orderID} order={order} />
-                                ))}
-                            </ListGroup>
-                        ) : (
-                            <p>No orders found.</p>
-                        )}
-                    </Card.Body>
-                </Card>
+                    <Card className="mb-4">
+                        <Card.Body>
+                            <Card.Title>Orders</Card.Title>
+                            {userData.orders && userData.orders.length > 0 ? (
+                                <ListGroup variant="flush">
+                                    {userData.orders.map(order => (
+                                        <OrderCard key={order.orderID} order={order} />
+                                    ))}
+                                </ListGroup>
+                            ) : (
+                                <p>No orders found.</p>
+                            )}
+                        </Card.Body>
+                    </Card>
 
-                    {/* Огляди */}
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Reviews</Card.Title>
@@ -81,7 +100,6 @@ export default function UserProfile() {
                         </Card.Body>
                     </Card>
 
-                    {/* Адреси доставки */}
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Shipping Addresses</Card.Title>
@@ -99,7 +117,6 @@ export default function UserProfile() {
                         </Card.Body>
                     </Card>
 
-                    {/* Списки бажань */}
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Wish Lists</Card.Title>
@@ -118,6 +135,11 @@ export default function UserProfile() {
                     </Card>
                 </Col>
             </Row>
+
+            {/* Edit User Component */}
+            {isEditing && (
+                <EditUser userData={userData} onClose={() => setIsEditing(false)} />
+            )}
         </Container>
     );
 }
