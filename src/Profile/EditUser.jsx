@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { AuthContext } from '../Contexts/AuthProvider';
 
 export default function EditUser({ userData, onClose }) {
-    const { apiRequest } = useContext(AuthContext);
+    const { apiRequest, userId } = useContext(AuthContext);
     const [newUserData, setNewUserData] = useState({
         UserName: userData.userName,
         Email: userData.email,
@@ -20,7 +20,7 @@ export default function EditUser({ userData, onClose }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await apiRequest('PUT', `api/users/${userData.id}`, newUserData);
+            await apiRequest('PUT', `api/users/${userId}`, newUserData);
             onClose(); // Close the modal after successful update
         } catch (error) {
             console.error('Failed to update user:', error);

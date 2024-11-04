@@ -41,7 +41,7 @@ function MakeOrder() {
                 AddressId: selectedAddress
             });
             alert("Order placed successfully!");
-            navigate('/orders');
+            navigate(`/UserProfile/${userId}`);
         } catch (error) {
             console.error("Error placing order:", error);
         }
@@ -89,7 +89,7 @@ function MakeOrder() {
 
             <Row className="justify-content-between mt-4">
                 <Col>
-                    <h5>Total: {totalAmount.toFixed(2)} ETH</h5>
+                    <h5>Total: {totalAmount} ETH</h5>
                 </Col>
                 <Col className="text-end">
                     <Button variant="primary" size="lg" onClick={handleMakeOrder}>
