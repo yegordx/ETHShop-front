@@ -1,15 +1,30 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../Contexts/AuthProvider';
-import { Container, Row, Col, Card, ListGroup, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, ListGroup, Button, Modal } from 'react-bootstrap';
 import OrderCard from '../Order/OrderCard';
 import EditUser from './EditUser';
+import EditShippingAddress from '../Address/EditAddress'
+
 export default function UserProfile() {
     const { apiRequest, userId, logout } = useContext(AuthContext);
     const [userData, setUserData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
     const navigate = useNavigate();
     const { userID } = useParams();
+    const [showModal, setShowModal] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState(null);
+
+    const handleEditClick = (address) => {
+        setSelectedAddress(address);
+        setShowModal(true);
+    };
+
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedAddress(null);
+    };
+
 
     async function fetchUserData() {
         try {
@@ -48,6 +63,19 @@ export default function UserProfile() {
         } catch (error) {
             console.error('Failed to delete user:', error);
         }
+    };
+    
+    const handleDeleteAddress = async (id) => {
+        // Implement delete user functionality here
+        try {
+            await apiRequest('DELETE', `api/addresses/${id}`);
+        } catch (error) {
+            console.error('Failed to delete address:', error);
+        }
+    };
+
+    const handleViewWishListsDetails = (productId) => {
+        navigate(`/WishLists`);
     };
 
     return (
@@ -106,8 +134,27 @@ export default function UserProfile() {
                             {userData.shippingAddresses && userData.shippingAddresses.length > 0 ? (
                                 <ListGroup variant="flush">
                                     {userData.shippingAddresses.map((address, index) => (
-                                        <ListGroup.Item key={index}>
-                                            <strong>Address:</strong> {address.addressLine}, {address.city}, {address.country} - {address.postalCode}
+                                        <ListGroup.Item key={index} className="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Address:</strong> {address.addressLine}, {address.city}, {address.country} - {address.postalCode}
+                                            </div>
+                                            <div>
+                                                <Button 
+                                                    variant="outline-primary" 
+                                                    size="sm" 
+                                                    onClick={() => handleEditClick(address)}
+                                                >
+                                                    Edit
+                                                </Button>
+                                                <Button 
+                                                    variant="outline-danger" 
+                                                    size="sm" 
+                                                    className="ms-2" 
+                                                    onClick={() => handleDeleteAddress(address.addressId)} // Замість addressId вкажіть правильне поле
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </div>
                                         </ListGroup.Item>
                                     ))}
                                 </ListGroup>
@@ -115,19 +162,30 @@ export default function UserProfile() {
                                 <p>No shipping addresses found.</p>
                             )}
                         </Card.Body>
+
+                        {/* Modal for editing address */}
+                        <Modal show={showModal} onHide={handleCloseModal}>
+                            <EditShippingAddress address={selectedAddress} onClose={handleCloseModal} />
+                        </Modal>
                     </Card>
 
                     <Card className="mb-4">
                         <Card.Body>
                             <Card.Title>Wish Lists</Card.Title>
-                            {userData.wishLists ? (
-                                <ListGroup variant="flush">
-                                    {userData.wishLists.map((wishList, index) => (
-                                        <ListGroup.Item key={index}>
-                                            <strong>Wish List ID:</strong> {wishList.wishListID} - <strong>Items:</strong> {wishList.wishListItems.length}
-                                        </ListGroup.Item>
-                                    ))}
-                                </ListGroup>
+                            {userData.wishLists && userData.wishLists.length > 0 ? (
+                                userData.wishLists.map((wishList, index) => (
+                                    <ListGroup.Item key={index}>
+                                        <span 
+                                            style={{ cursor: 'pointer', color: 'black', textDecoration: 'none' }} 
+                                            onClick={() => handleViewWishListsDetails(wishList.id)}
+                                        >
+                                            <strong>{wishList.name}</strong>
+                                        </span>
+                                        <div>
+                                            <strong>Items:</strong> {wishList.wishListItems.length}
+                                        </div>
+                                    </ListGroup.Item>
+                                ))
                             ) : (
                                 <p>No wish lists found.</p>
                             )}

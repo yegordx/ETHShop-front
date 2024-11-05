@@ -20,6 +20,9 @@ function CartModal({ items, show, onClose }) {
         await apiRequest('PUT', `api/shoppingcarts/items/${id}`, {action: false});
     };
 
+    async function removeFromCart(id) {
+        await apiRequest('DELETE', `api/shoppingcarts/items/${id}`);
+    };
 
     // Групуємо товари за `sellerId`
     const itemsBySeller = items.reduce((acc, item) => {
@@ -50,7 +53,7 @@ function CartModal({ items, show, onClose }) {
                             <h5>Seller {sellerId}</h5>
                             <ListGroup>
                                 {itemsBySeller[sellerId].map((item) => (
-                                    <ListGroup.Item key={item.id} className="d-flex align-items-center">
+                                    <ListGroup.Item key={item.id} className="d-flex align-items-center position-relative">
                                         <div className="flex-grow-1">
                                             <h6>{item.productName}</h6>
                                             <p>Price: {item.priceETH} ETH</p>
@@ -73,7 +76,15 @@ function CartModal({ items, show, onClose }) {
                                             </div>
                                         </div>
                                         <div>
-                                        <p>Sum: {(item.priceETH * item.quantity)} ETH</p>                                        </div>
+                                            <p>Sum: {(item.priceETH * item.quantity)} ETH</p>
+                                        </div>
+                                        <Button
+                                            variant="dark"
+                                            className="position-absolute top-0 end-0 p-1"
+                                            onClick={() => removeFromCart(item.cartItemId)}
+                                        >
+                                            &times;
+                                        </Button>
                                     </ListGroup.Item>
                                 ))}
                             </ListGroup>

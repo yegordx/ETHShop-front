@@ -4,18 +4,25 @@ import { AuthContext } from '../Contexts/AuthProvider';
 import { Container, Row, Col, Card, ListGroup, Button, ListGroupItem, Modal, Form } from 'react-bootstrap';
 import ReviewCard from '../Review/ReviewCard';
 import CreateProductModal from '../Product/CreateProductModal';
+import EditSeller from './EditSeller';
 
 export default function SellerProfile() {
     const { apiRequest, userId } = useContext(AuthContext);
     const [sellerData, setSellerData] = useState(null);
     const { sellerId } = useParams();
-    const [showModal, setShowModal] = useState(false);
+    const [showProductModal, setShowProductModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [newProductData, setNewProductData] = useState({ Name: '', Description: '', PriceEth: 0 });
     const [reviews, setReviews] = useState([]);
 
+    const [showEditSellerModal, setShowEditSellerModal] = useState(false);
+
+    const handleOpenEditSellerModal = () => setShowEditSellerModal(true);
+    const handleCloseEditSellerModal = () => setShowEditSellerModal(false);
+
     const navigate = useNavigate();
+
     async function fetchSellerData() {
         try {
             const response = await apiRequest('GET', `api/sellers/${sellerId}`);
@@ -65,18 +72,6 @@ export default function SellerProfile() {
         }
     }
 
-    // async function updateSellerData(productId, newSellerData) {
-    //     try {
-    //         await apiRequest('PUT', `api/products/${productId}`, {
-    //             ProductName: newProductData.Name,
-    //             Description: newProductData.Description,
-    //             PriceETH: newProductData.PriceEth,
-    //         });
-    //     } catch (error) {
-    //         console.error('Failed to update product:', error);
-    //     }
-    // }
-
     async function fetchReviewsData() {
         try {
             const response = await apiRequest('GET', `api/reviews`, {
@@ -88,6 +83,19 @@ export default function SellerProfile() {
         }
     }
 
+    async function updateSellerData(id, newSellerData){
+        try {
+            await apiRequest('PUT', `api/sellers/${id}`, {
+                StoreName: newSellerData.StoreName,
+                StoreDescription: newSellerData.Description,
+                ContactEmail: newSellerData.Email,
+                ContactPhone: newSellerData.Phone
+            });
+        } catch (error) {
+            console.error('Failed to update seller data:', error);
+        }
+    } 
+
     useEffect(() => {
         if (sellerId) {
             fetchSellerData();
@@ -95,8 +103,8 @@ export default function SellerProfile() {
         }
     }, [userId]);
 
-    const handleShowModal = () => setShowModal(true);
-    const handleCloseModal = () => setShowModal(false);
+    const handleShowProductModal = () => setShowProductModal(true);
+    const handleCloseProductModal = () => setShowProductModal(false);
 
     const handleCreateProduct = async (newProductData) => {
         try {
@@ -126,6 +134,15 @@ export default function SellerProfile() {
                         <Card.Body>
                             <Card.Title>Store Information</Card.Title>
                             <ListGroup variant="flush">
+                            <Button variant="primary" onClick={handleOpenEditSellerModal}>
+                                Edit Store
+                            </Button>
+                            <EditSeller
+                                show={showEditSellerModal}
+                                handleClose={handleCloseEditSellerModal}
+                                sellerData={sellerData}
+                                updateSellerData={updateSellerData}
+                            />
                                 <ListGroup.Item><strong>Store Name:</strong> {sellerData.storeName}</ListGroup.Item>
                                 <ListGroup.Item><strong>Description:</strong> {sellerData.description}</ListGroup.Item>
                                 <ListGroup.Item><strong>Email:</strong> {sellerData.email}</ListGroup.Item>
@@ -140,7 +157,7 @@ export default function SellerProfile() {
                         <Card.Body>
                             <Card.Title>Products</Card.Title>
                             {userId === sellerId && (
-                                <Button variant="primary" className="mb-3" onClick={handleShowModal}>
+                                <Button variant="primary" className="mb-3" onClick={handleShowProductModal}>
                                     Add New Product
                                 </Button>
                             )}
@@ -195,8 +212,8 @@ export default function SellerProfile() {
             </Row>
 
             <CreateProductModal 
-                show={showModal} 
-                handleClose={handleCloseModal} 
+                show={showProductModal} 
+                handleClose={handleCloseProductModal} 
                 handleCreateProduct={handleCreateProduct} 
             />
 
