@@ -132,15 +132,19 @@ export default function SellerProfile() {
                         <Card.Body>
                             <Card.Title>Store Information</Card.Title>
                             <ListGroup variant="flush">
-                            <Button variant="primary" onClick={handleOpenEditSellerModal}>
-                                Edit Store
-                            </Button>
-                            <EditSeller
-                                show={showEditSellerModal}
-                                handleClose={handleCloseEditSellerModal}
-                                sellerData={sellerData}
-                                updateSellerData={updateSellerData}
-                            />
+                                {userId == sellerId? (
+                                    <>
+                                    <Button variant="primary" onClick={handleOpenEditSellerModal}>
+                                    Edit Store
+                                    </Button>
+                                    <EditSeller
+                                    show={showEditSellerModal}
+                                    handleClose={handleCloseEditSellerModal}
+                                    sellerData={sellerData}
+                                    updateSellerData={updateSellerData}
+                                />
+                                </>
+                                ): (<></>)}
                                 <ListGroup.Item><strong>Store Name:</strong> {sellerData.storeName}</ListGroup.Item>
                                 <ListGroup.Item><strong>Description:</strong> {sellerData.description}</ListGroup.Item>
                                 <ListGroup.Item><strong>Email:</strong> {sellerData.email}</ListGroup.Item>
