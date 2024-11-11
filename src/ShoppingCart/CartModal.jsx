@@ -11,18 +11,17 @@ function CartModal({ items, show, onClose }) {
         items.reduce((acc, item) => ({ ...acc, [item.id]: item.quantity || 1 }), {})
     );
 
-    async function increaseQuantity (id) {
-        await apiRequest('PUT', `api/shoppingcarts/items/${id}`, {action: true});
-
-    };
+    async function increaseQuantity(id) {
+        await apiRequest('PUT', `api/shoppingcarts/items/${id}`, { action: true });
+    }
 
     async function decreaseQuantity(id) {
-        await apiRequest('PUT', `api/shoppingcarts/items/${id}`, {action: false});
-    };
+        await apiRequest('PUT', `api/shoppingcarts/items/${id}`, { action: false });
+    }
 
     async function removeFromCart(id) {
         await apiRequest('DELETE', `api/shoppingcarts/items/${id}`);
-    };
+    }
 
     // Групуємо товари за `sellerId`
     const itemsBySeller = items.reduce((acc, item) => {
@@ -30,11 +29,6 @@ function CartModal({ items, show, onClose }) {
         acc[item.sellerId].push(item);
         return acc;
     }, {});
-
-    const totalAmount = items.reduce(
-        (total, item) => total + item.priceETH * item.quantity,
-        0
-    );
 
     const handleOrder = (sellerId) => {
         onClose();
@@ -48,54 +42,65 @@ function CartModal({ items, show, onClose }) {
             </Modal.Header>
             <Modal.Body>
                 {items.length > 0 ? (
-                    Object.keys(itemsBySeller).map((sellerId) => (
-                        <div key={sellerId} className="mb-4">
-                            <h5>Seller {sellerId}</h5>
-                            <ListGroup>
-                                {itemsBySeller[sellerId].map((item) => (
-                                    <ListGroup.Item key={item.id} className="d-flex align-items-center position-relative">
-                                        <div className="flex-grow-1">
-                                            <h6>{item.productName}</h6>
-                                            <p>Price: {item.priceETH} ETH</p>
-                                            <div className="d-flex align-items-center">
-                                                <Button
-                                                    variant="outline-secondary"
-                                                    size="sm"
-                                                    onClick={() => decreaseQuantity(item.cartItemId)}
-                                                >
-                                                    -
-                                                </Button>
-                                                <span className="mx-2">{item.quantity}</span>
-                                                <Button
-                                                    variant="outline-secondary"
-                                                    size="sm"
-                                                    onClick={() => increaseQuantity(item.cartItemId)}
-                                                >
-                                                    +
-                                                </Button>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <p>Sum: {(item.priceETH * item.quantity)} ETH</p>
-                                        </div>
-                                        <Button
-                                            variant="dark"
-                                            className="position-absolute top-0 end-0 p-1"
-                                            onClick={() => removeFromCart(item.cartItemId)}
+                    Object.keys(itemsBySeller).map((sellerId) => {
+                        // Підсумкова вартість товарів конкретного продавця
+                        const sellerTotalAmount = itemsBySeller[sellerId].reduce(
+                            (total, item) => total + item.priceETH * item.quantity,
+                            0
+                        );
+
+                        return (
+                            <div key={sellerId} className="mb-4">
+                                <h5>Seller {sellerId}</h5>
+                                <ListGroup>
+                                    {itemsBySeller[sellerId].map((item) => (
+                                        <ListGroup.Item
+                                            key={item.id}
+                                            className="d-flex align-items-center position-relative"
                                         >
-                                            &times;
-                                        </Button>
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
-                            <div className="d-flex justify-content-between align-items-center mt-3">
-                            <h5>Total: {totalAmount} ETH</h5>
-                                <Button variant="success" onClick={() => handleOrder(sellerId)}>
-                                    Make order
-                                </Button>
+                                            <div className="flex-grow-1">
+                                                <h6>{item.productName}</h6>
+                                                <p>Price: {item.priceETH} ETH</p>
+                                                <div className="d-flex align-items-center">
+                                                    <Button
+                                                        variant="outline-secondary"
+                                                        size="sm"
+                                                        onClick={() => decreaseQuantity(item.cartItemId)}
+                                                    >
+                                                        -
+                                                    </Button>
+                                                    <span className="mx-2">{item.quantity}</span>
+                                                    <Button
+                                                        variant="outline-secondary"
+                                                        size="sm"
+                                                        onClick={() => increaseQuantity(item.cartItemId)}
+                                                    >
+                                                        +
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <p>Sum: {(item.priceETH * item.quantity).toFixed(2)} ETH</p>
+                                            </div>
+                                            <Button
+                                                variant="dark"
+                                                className="position-absolute top-0 end-0 p-1"
+                                                onClick={() => removeFromCart(item.cartItemId)}
+                                            >
+                                                &times;
+                                            </Button>
+                                        </ListGroup.Item>
+                                    ))}
+                                </ListGroup>
+                                <div className="d-flex justify-content-between align-items-center mt-3">
+                                    <h5>Total: {sellerTotalAmount.toFixed(2)} ETH</h5>
+                                    <Button variant="success" onClick={() => handleOrder(sellerId)}>
+                                        Make order
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <p>Cart is empty</p>
                 )}
