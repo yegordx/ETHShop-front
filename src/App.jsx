@@ -27,8 +27,8 @@ function App() {
             <Route path="/" index element={<Main />} />
             <Route path="/loginUser" element={<Login />} />
             <Route path="/registration" element={<Registration />} />
-            <Route path="/SellerProfile/:sellerId" element={<SellerProfile />} />
-            <Route path="/UserProfile/:userID" element={<UserProfile />} />
+            <Route path="/Seller/:sellerId" element={<SellerProfile />} />
+            <Route path="/User/:userID" element={<UserProfile />} />
             <Route path="/register-seller" element={<RegSeller/>} />
             <Route path="/Category/:categoryId" element={<Category />} />
             <Route path="/Product/:productId" element={<Product />} />

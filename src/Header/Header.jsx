@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../Contexts/AuthProvider';
 import NavElement, { DropDownItem } from './NavElement';
 import CartModal from '../ShoppingCart/CartModal'
+import SearchElement from './SearchElement';
 
 export default function Header() {
     const { isAuthenticated, logout, switchAccount, role, userId, apiRequest } = useContext(AuthContext);
@@ -12,9 +13,9 @@ export default function Header() {
 
     const handleViewDetails = () => {
         if (role === "User") {
-            navigate(`/UserProfile/${userId}`);
+            navigate(`/User/${userId}`);
         } else if (role === "Seller") {
-            navigate(`/SellerProfile/${userId}`);
+            navigate(`/Seller/${userId}`);
         }
     };
 
@@ -50,12 +51,7 @@ export default function Header() {
                     <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>Avet</Link>
                 </h1>
             </div>
-            <input 
-                type="search" 
-                className="form-control form-control text-bg w-50" 
-                placeholder="Search..." 
-                aria-label="Search" 
-            />
+            <SearchElement />
             <nav className="nav">
                 <ul className="nav-list d-flex">
                     {role === "User" ? (
