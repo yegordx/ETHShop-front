@@ -9,16 +9,9 @@ export default function ReviewsPage() {
     const navigate = useNavigate(); // Initialize useNavigate
 
     async function fetchReviewsData() {
-        let response;
-        if (role === "User") {
-            response = await apiRequest('GET', `api/reviews`, {
-                userId: userId
-            });
-        } else if (role === "Seller") {
-            response = await apiRequest('GET', `api/reviews`, {
-                sellerId: userId
-            });
-        }
+
+        const response = await apiRequest('GET', `api/reviews/${userId}?type=${role}`);
+
 
         setReviews(response || []); // Ensure it's an array
     }

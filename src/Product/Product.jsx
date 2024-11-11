@@ -23,9 +23,7 @@ export default function Product() {
     
     async function fetchReviewsData() {
         try {
-            const response = await apiRequest('GET', `api/reviews`, {
-                prodcutId: productId
-            });
+            const response = await apiRequest('GET', `api/reviews/${productId}?type=Product`);
             setReviews(response);
         } catch (error) {
             console.error('Failed to fetch seller data:', error);

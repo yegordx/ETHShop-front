@@ -74,9 +74,7 @@ export default function SellerProfile() {
 
     async function fetchReviewsData() {
         try {
-            const response = await apiRequest('GET', `api/reviews`, {
-                sellerId: sellerId,
-            });
+            const response = await apiRequest('GET', `api/reviews/${sellerId}?type=Seller`);
             setReviews(response);
         } catch (error) {
             console.error('Failed to fetch reviews:', error);
