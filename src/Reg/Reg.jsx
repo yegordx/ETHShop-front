@@ -1,21 +1,33 @@
 import { Link, useNavigate } from 'react-router-dom';
 import  '../Login/Login.css';
 import { useActiveAccount } from "thirdweb/react";
-import WalletButton from "./WalletComponent";
+// import WalletButton from "./WalletComponent";
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../Contexts/AuthProvider'; // Правильний контекст
+import Web3 from 'web3';
+import {Button} from "react-bootstrap"
 
 export default function Registration() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [walletAddress, setWalletAddress] = useState(null);
 
   const { setTokenAndRole, apiRequest, errorMessage, setErrorMessage } = useContext(AuthContext);
 
   const navigate = useNavigate();
   
-  const activeAccount = useActiveAccount();
-  const address = activeAccount?.address;
+  const connectWallet = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.requestAccounts();
+
+        // Отримання першого облікового запису (адреси гаманця)
+        setWalletAddress(accounts[0]);
+      } catch (error) {
+        console.error("Не вдалося підключитися до MetaMask:", error);
+      }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +42,7 @@ export default function Registration() {
       return;
     }
 
-    if (!address) {
+    if (!walletAddress) {
       setErrorMessage('Please connect your wallet.');
       return;
     }
@@ -40,7 +52,7 @@ export default function Registration() {
         UserName: email.split('@')[0], 
         Email: email,
         Password: password,
-        WalletAddress: address,
+        WalletAddress: walletAddress,
       });
 
       if (response) {
@@ -97,9 +109,17 @@ export default function Registration() {
             onChange={(e) => setConfirmPassword(e.target.value)} // Зберігаємо введене значення
           />
         </div>
-        <div className="input-box">
-            <WalletButton/>
-        </div> 
+        <div>
+          <Button onClick={connectWallet} style={{ backgroundColor: "#ccf2f2", color: "black", border: "0" }}>
+          {walletAddress ? walletAddress : "Підключити гаманець"}
+            </Button>
+          <p></p>
+        </div>
+        
+        {walletAddress != null ? (
+          <Button onClick={() => setWalletAddress(null)}>Disconnect</Button>
+        ) : null}        
+        <p></p>
         <div className="input-submit">
           <button className="submit-btn" id="submit" type="submit">Sign Up</button>
         </div>

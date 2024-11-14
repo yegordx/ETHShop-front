@@ -3,6 +3,7 @@ import { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../Contexts/AuthProvider';
 import { ListGroup, Form, Button, Container, Row, Col, Modal } from 'react-bootstrap';
 import AddressManager from '../Address/AddressManager';
+import interactWithContract from './interactWihContract';
 
 function MakeOrder() {
     const { sellerId } = useParams();
@@ -33,19 +34,33 @@ function MakeOrder() {
             alert("Please select a delivery address.");
             return;
         }
-
+    
         try {
-            await apiRequest('POST', `api/orders`, {
+            // Створення замовлення через API
+            const orderId = await apiRequest('POST', `api/orders`, {
                 UserId: userId,
                 SellerId: sellerId,
                 AddressId: selectedAddress
             });
             alert("Order placed successfully!");
+    
+            const sellersWalletAddress = await apiRequest('GET', `api/sellers/wallet/${sellerId}`);
+    
+            const transHash = await interactWithContract(sellersWalletAddress, totalAmount);
+    
+            await apiRequest('POST', `api/orders/${orderId}`, {
+                TransactionHash: transHash,
+                Amount: totalAmount
+            });
+    
+            // Перехід на сторінку профілю користувача
             navigate(`/UserProfile/${userId}`);
         } catch (error) {
             console.error("Error placing order:", error);
+            alert("Error placing order. Please try again.");
         }
     };
+    
 
     const handleRemove = async (productId) => {
         try {

@@ -2,7 +2,6 @@ import { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { jwtDecode } from "jwt-decode";
-import { useActiveAccount } from "thirdweb/react";
 import { SiAzurefunctions } from 'react-icons/si';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -14,8 +13,6 @@ const AuthProvider = ({ children }) => {
     const [errorMessage, setErrorMessage] = useState('');
     const [role, setRole] = useState(null); // Додаємо змінну для ролі
     const [userId, setuserId] = useState(null);
-    const activeAccount = useActiveAccount();
-    const address = activeAccount?.address;
 
     useEffect(() => {
         const token = Cookies.get('jwt');
