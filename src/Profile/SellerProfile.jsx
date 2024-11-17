@@ -27,6 +27,7 @@ export default function SellerProfile() {
         try {
             const response = await apiRequest('GET', `api/sellers/${sellerId}`);
             setSellerData(response);
+            console.log(response);
         } catch (error) {
             console.error('Failed to fetch seller data:', error);
         }
@@ -149,6 +150,7 @@ export default function SellerProfile() {
                                 <ListGroup.Item><strong>Description:</strong> {sellerData.description}</ListGroup.Item>
                                 <ListGroup.Item><strong>Email:</strong> {sellerData.email}</ListGroup.Item>
                                 <ListGroup.Item><strong>Phone Number:</strong> {sellerData.phoneNumber}</ListGroup.Item>
+                                <ListGroup.Item><strong>Rating:</strong> {sellerData.rating} <span style={{ color: 'orange' }}>★</span></ListGroup.Item>
                             </ListGroup>
                         </Card.Body>
                     </Card>

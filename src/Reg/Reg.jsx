@@ -18,16 +18,19 @@ export default function Registration() {
   const navigate = useNavigate();
   
   const connectWallet = async () => {
-      try {
-        const web3 = new Web3(window.ethereum);
-        const accounts = await web3.eth.requestAccounts();
-
-        // Отримання першого облікового запису (адреси гаманця)
-        setWalletAddress(accounts[0]);
-      } catch (error) {
-        console.error("Не вдалося підключитися до MetaMask:", error);
-      }
+    try {
+      const web3 = new Web3(window.ethereum);
+      
+      // Правильний спосіб запиту облікових записів через MetaMask
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      
+      // Отримання першого облікового запису (адреси гаманця)
+      setWalletAddress(accounts[0]);
+    } catch (error) {
+      console.error("Не вдалося підключитися до MetaMask:", error);
+    }
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();

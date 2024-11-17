@@ -44,14 +44,14 @@ function MakeOrder() {
             });
             alert("Order placed successfully!");
     
-            const sellersWalletAddress = await apiRequest('GET', `api/sellers/wallet/${sellerId}`);
+            // const sellersWalletAddress = await apiRequest('GET', `api/sellers/wallet/${sellerId}`);
     
-            const transHash = await interactWithContract(sellersWalletAddress, totalAmount);
+            // const transHash = await interactWithContract(sellersWalletAddress, totalAmount);
     
-            await apiRequest('POST', `api/orders/${orderId}`, {
-                TransactionHash: transHash,
-                Amount: totalAmount
-            });
+            // await apiRequest('POST', `api/orders/${orderId}`, {
+            //     TransactionHash: transHash,
+            //     Amount: totalAmount
+            // });
     
             // Перехід на сторінку профілю користувача
             navigate(`/UserProfile/${userId}`);
