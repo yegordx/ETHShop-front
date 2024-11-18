@@ -16,6 +16,7 @@ import Product from './Product/Product'
 import WishLists from './UserAtributes/WishLists'
 import MakeOrder from './Order/MakeOrder'
 import ReviewsPage from './Review/ReviewsPage'
+import SellersAnalytic from './Profile/Analytic/SellersAnalytic'
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
             <Route path="/WishLists" element={<WishLists />} />
             <Route path="/MakeOrder/:sellerId" element={<MakeOrder />} />
             <Route path="/ReviewsPage" element={<ReviewsPage />} />
+            <Route path="/SellersAnalytic" element={<SellersAnalytic/>} />
           </Routes>
           <FooterComponent />
         </AuthProvider>

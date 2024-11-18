@@ -19,6 +19,10 @@ export default function Header() {
         }
     };
 
+    const handleViewAnalytic = () => {
+            navigate(`/SellersAnalytic`);
+    };
+
     const handleCartClick = () => {
         fetchShoppingCartData();
         setIsCartModalOpen(true);
@@ -66,6 +70,11 @@ export default function Header() {
                             <DropDownItem text="Profile" onClick={handleViewDetails} />
                             <DropDownItem text="Switch account" onClick={switchAccount} />
                             <DropDownItem text="Logout" onClick={logout} />
+                            {role === "Seller" ? (
+                            <>
+                                <DropDownItem text="Analytic" onClick={handleViewAnalytic} />
+                            </>
+                    ) : null}
                         </NavElement>
                     ) : (
                         <NavElement text="Log In" to="/loginUser" />
